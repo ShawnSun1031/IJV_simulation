@@ -22,16 +22,17 @@ import time
 import sys
 
 # script setting
-# local small mus1~600
-# Amanda r7_3700x small mus601~1365
-# GS md703_i7_6700 large mus1~700
-# vicky dell_t3500d large mus701~1365 # error message mus798 mus858 [Errno 5] Input/output error
-datasetpath = sys.argv[1] #datasetpath = "ctchen_dataset_small"
-ID = sys.argv[2] # ID = "ctchen_ijv_small_to_large"
+# local small mus1~765
+# Amanda r7_3700x large mus1~1365
+# GS md703_i7_6700 small mus766~1365
+# vicky dell_t3500d large mus766~1365 
+
+datasetpath = sys.argv[1] #datasetpath = "KB_dataset_small"
+ID = sys.argv[2] # ID = "KB_ijv_small_to_large"
 mus_start = int(sys.argv[3])
 mus_end = int(sys.argv[4])
-# ID = "ctchen_ijv_small_to_large"
-# datasetpath = "ctchen_dataset_small"
+# ID = "KB_ijv_small_to_large"
+# datasetpath = "KB_dataset_small"
 # mus_start = 
 # mus_end = 
 #%%

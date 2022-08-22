@@ -21,20 +21,15 @@ import sys
 # script setting
 # photon 1e9 take 1TB  CV 0.29%~0.81%  13mins per mus
 # photon 3e8 take 350GB CV 0.48%~1.08% 4mins per mus  wmc 110 mins per mus
-# local small mus1~600
-# Amanda r7_3700x small mus601~1365
-# GS md703_i7_6700 large mus1~700
-# vicky dell_t3500d large mus701~1365  # error message mus798 mus858 [Errno 5] Input/output error
 
+# local small mus1~765
+# Amanda r7_3700x large mus1~765
+# GS md703_i7_6700 small mus766~1365
+# vicky dell_t3500d large mus766~1365  
 
-# To DO --> do every 1st mus
-# ID = sys.argv[1] #ID = "KB_ijv_small_to_large"
-# mus_start = int(sys.argv[2])
-# mus_end = int(sys.argv[3])
-
-ID = "KB_ijv_small_to_large"
-mus_start = 1
-mus_end = 600
+ID = sys.argv[1] #ID = "KB_ijv_small_to_large"
+mus_start = int(sys.argv[2])
+mus_end = int(sys.argv[3])
 #%% run
 mus_set = np.load("mus_set.npy")
 muaPath = "mua_test.json"

@@ -15,10 +15,9 @@ import numpy as np
 import sys
 
 # script setting
-# sessionID = sys.argv[1] # sessionID = "KB_ijv_small_to_large"
-# PhotonNum = sys.argv[2] # PhotonNum = 3e8
-sessionID = "KB_ijv_small_to_large"
-PhotonNum = 3e8
+sessionID = sys.argv[1] # sessionID = "KB_ijv_small_to_large"
+PhotonNum = sys.argv[2] # PhotonNum = 3e8
+
 # sessionID = "KB_ijv_small_to_large"
 # PhotonNum = 3e8
 #%% run
