@@ -9,11 +9,15 @@ Created on Mon Aug 22 00:13:13 2022
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
+import os
 
-vol = np.load('kb_perturbed_small_to_large.npy')
+vol = np.load(os.path.join('ultrasound_image_processing','KB_perturbed_small_to_large.npy'))
 vol = vol.T
-# plt.imshow(vol[int(vol.shape[0]//2),:,:].T)
-vol = vol[::8,::8,::24]
+# plt.imshow(vol[:,:,int(vol.shape[2]//2)])
+# plt.imshow(vol[:,int(vol.shape[1]//2),:])
+# plt.imshow(vol[0,:,:])
+
+vol = vol[::4,::4,::12]
 cmap = ['red', 'salmon', 'sienna', 'silver', 'tan', 'white', 'violet', 'wheat', 'yellow']
 def explode(data):
     size = np.array(data.shape)*2
@@ -44,7 +48,32 @@ z[:, :, 1::2] += 0.95
 
 
 ax = plt.figure().add_subplot(projection='3d')
+
+#horizontal
+Y = np.linspace(-y.max()*0.1, y.max()+y.max()*0.1, 100)
+Z = np.linspace(-z.max()*0.1, z.max()+z.max()*0.1, 100)
+Y, Z = np.meshgrid(Y, Z)
+X = np.ones(np.shape(Y))*x.max()//2
+surf = ax.plot_surface(X, Y, Z, alpha=0.5, cmap=plt.cm.twilight, 
+                        linewidth=0, antialiased=False)
+# frontal plane
+X = np.linspace(-x.max()*0.1, x.max()+x.max()*0.1, 100)
+Z = np.linspace(-z.max()*0.1, z.max()+z.max()*0.1, 100)
+X, Z = np.meshgrid(X, Z)
+Y = np.ones(np.shape(X))*x.max()//2
+surf = ax.plot_surface(X, Y, Z, alpha=0.5, cmap=plt.cm.twilight, 
+                        linewidth=0, antialiased=False)
+# # sagittal plane
+X = np.linspace(-x.max()*0.1, x.max()+x.max()*0.1, 100)
+Y = np.linspace(-y.max()*0.1, y.max()+y.max()*0.1, 100)
+X, Y = np.meshgrid(X, Y)
+Z = np.ones(np.shape(X))*x.max()//2
+surf = ax.plot_surface(X, Y, Z, alpha=0.5, cmap=plt.cm.twilight, 
+                        linewidth=0, antialiased=False)
+
+
 ax.voxels(x,y,z,vol, facecolors=colors, edgecolor=edgecolor)
+ax.view_init(25,128)
 plt.show()
 
 # plt.figure()
