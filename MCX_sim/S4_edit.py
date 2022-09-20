@@ -22,7 +22,7 @@ import sys
 # mus_end = int(sys.argv[4])
 
 ID = "KB_ijv_small_to_large"
-datasetpath = "KB_dataset_small"
+datasetpath = "KB_dataset_small_to_large"
 mus_start = 1
 mus_end = 1
 #%%
@@ -108,7 +108,7 @@ def WMC(detOutputPathSet,detectorNum,used_SDS,used_mua):
         # sort (to make calculation of cv be consistent in each time)
         detOutput = jd.load(detOutputPath)
         info = detOutput["MCXData"]["Info"]
-        photonData = detOutput["MCXData"]["PhotonData"] 
+        photonData = detOutput["MCXData"]["PhotonData"]
         # unit conversion for photon pathlength
         photonData["ppath"] = photonData["ppath"] * info["LengthUnit"]
         photonData["detid"] = photonData["detid"] -1 # shift detid from 0 to start
@@ -117,6 +117,53 @@ def WMC(detOutputPathSet,detectorNum,used_SDS,used_mua):
             # I = I0 * exp(-mua*L)
             # W_sim
             reflectance[detOutputIdx][detectorIdx] = cp.exp(-ppath@used_mua).sum() / photonNum
+        for fiberIdx in range(len(fiberSet)):
+            group_reflectance[fiberIdx][detOutputIdx] = cp.mean(reflectance[detOutputIdx][used_SDS])
+            used_SDS = used_SDS + 2*3
+    
+    output_R = group_reflectance.mean(axis=1)  
+        
+    return output_R
+
+def PMC(detOutputPathSet,detectorNum,used_SDS,used_mua):
+    reflectance = cp.empty((len(detOutputPathSet), detectorNum))
+    group_reflectance = cp.empty((len(fiberSet),len(detOutputPathSet)))
+    for detOutputIdx, detOutputPath in enumerate(detOutputPathSet):
+        # main
+        # sort (to make calculation of cv be consistent in each time)
+        detOutput = jd.load(detOutputPath)
+        info = detOutput["MCXData"]["Info"]
+        photonData = detOutput["MCXData"]["PhotonData"]
+        # unit conversion for photon pathlength
+        photonData["ppath"] = photonData["ppath"] * info["LengthUnit"]
+        photonData["detid"] = photonData["detid"] -1 # shift detid from 0 to start
+        for detectorIdx in range(info["DetNum"]):
+            ppath = cp.asarray(photonData["ppath"][photonData["detid"][:, 0]==detectorIdx])
+            nscat = cp.asarray(photonData["nscat"][photonData["detid"][:, 0]==detectorIdx])
+            W_sim = cp.exp(-ppath@used_mua).sum() / photonNum
+            # W_new = W_sim*((us_new/ut_new)/(us_old/ut_old))^j*(ut_new/ut_old)^j*exp(-ut_new*path)/exp(-ut_old*path)
+            if ID.find("small_to_large") != -1:
+                us_new = mus_set[mus_run_idx-1,3] # IJV mus
+                ua_new = mua_set[mua_run_idx,3] # IJV mua
+                us_old = mus_set[mus_run_idx-1,2] # muscle mus
+                ua_old = mua_set[mua_run_idx,2] # muscle mua
+                ut_new = us_new + ua_new
+                ut_old = us_old + ua_old
+            elif ID.find("large_to_small") != -1:
+                us_new = mus_set[mus_run_idx-1,2] # muscle mus
+                ua_new = mua_set[mua_run_idx,2] # muscle mua
+                us_old = mus_set[mus_run_idx-1,3] # IJV mus
+                us_new = mua_set[mua_run_idx,3] # IJV mua
+                ut_new = us_new + ua_new
+                ut_old = us_old + ua_old
+            else:
+                raise Exception("Something wrong in your ID name !")
+            ppath = cp.float64(cp.sum(ppath[:,7])) # perturb region pathlength
+            nscat = cp.float64(cp.sum(nscat[:,7])) # perturb region # of collision
+            W_new =  W_sim*(((us_new/ut_new)/(us_old/ut_old))**nscat)*((ut_new/ut_old)**nscat)*(cp.exp(-ut_new*ppath)/cp.exp(-ut_old*ppath))
+            # I = I0 * exp(-mua*L)
+            # W_sim
+            reflectance[detOutputIdx][detectorIdx] = W_new
         for fiberIdx in range(len(fiberSet)):
             group_reflectance[fiberIdx][detOutputIdx] = cp.mean(reflectance[detOutputIdx][used_SDS])
             used_SDS = used_SDS + 2*3
@@ -136,7 +183,10 @@ if __name__ == "__main__":
             if mua_run_idx % int(mua_set.shape[0]/100) == 0:
                 print(f"mua_{mua_run_idx}/{mua_set.shape[0]} ",end="")
             used_mua = processsor.get_used_mua(mua_set, mua_run_idx)
-            output_R = WMC(detOutputPathSet,detectorNum,used_SDS,used_mua)
+            if datasetpath.find("small_to_large") != -1 or datasetpath.find("large_to_small") != -1:
+                output_R = PMC(detOutputPathSet,detectorNum,used_SDS,used_mua)
+            else:
+                output_R = WMC(detOutputPathSet,detectorNum,used_SDS,used_mua)
             dataset_output[mua_run_idx,10:] = cp.asnumpy(output_R)
             used_mua = list(cp.asnumpy(used_mua))
             used_mua = used_mua[3:] # skin, fat, muscle, perturbed, IJV, CCA
