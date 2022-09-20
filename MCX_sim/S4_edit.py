@@ -140,7 +140,7 @@ def PMC(detOutputPathSet,detectorNum,used_SDS,used_mua):
         for detectorIdx in range(info["DetNum"]):
             ppath = cp.asarray(photonData["ppath"][photonData["detid"][:, 0]==detectorIdx])
             nscat = cp.asarray(photonData["nscat"][photonData["detid"][:, 0]==detectorIdx])
-            W_sim = cp.exp(-ppath@used_mua).sum() / photonNum
+            W_sim = cp.float64(cp.exp(-ppath@used_mua).sum() / photonNum)
             # W_new = W_sim*((us_new/ut_new)/(us_old/ut_old))^j*(ut_new/ut_old)^j*exp(-ut_new*path)/exp(-ut_old*path)
             if ID.find("small_to_large") != -1:
                 us_new = mus_set[mus_run_idx-1,3] # IJV mus
@@ -158,9 +158,10 @@ def PMC(detOutputPathSet,detectorNum,used_SDS,used_mua):
                 ut_old = us_old + ua_old
             else:
                 raise Exception("Something wrong in your ID name !")
-            ppath = cp.float64(cp.sum(ppath[:,7])) # perturb region pathlength
-            nscat = cp.float64(cp.sum(nscat[:,7])) # perturb region # of collision
-            W_new =  W_sim*(((us_new/ut_new)/(us_old/ut_old))**nscat)*((ut_new/ut_old)**nscat)*(cp.exp(-ut_new*ppath)/cp.exp(-ut_old*ppath))
+            ppath = cp.float64(cp.mean(ppath[:,7])) # perturb region pathlength
+            nscat = cp.float64(cp.mean(nscat[:,7])) # perturb region # of collision
+            # W_new =  W_sim*(((us_new/ut_new)/(us_old/ut_old))**nscat)*((ut_new/ut_old)**nscat)*(cp.float64(cp.exp(-ut_new*ppath)/cp.exp(-ut_old*ppath)))
+            W_new =  W_sim*((us_new/us_old)**nscat)*(cp.float64(cp.exp(-ut_new*ppath)/cp.exp(-ut_old*ppath)))
             # I = I0 * exp(-mua*L)
             # W_sim
             reflectance[detOutputIdx][detectorIdx] = W_new
@@ -193,4 +194,3 @@ if __name__ == "__main__":
             used_mua = used_mua[:3] + used_mua[4:]
             dataset_output[mua_run_idx,:10] = np.array([*used_mus, *used_mua])
         np.save(os.path.join(datasetpath,f"mus_{mus_run_idx}"),dataset_output)
-
