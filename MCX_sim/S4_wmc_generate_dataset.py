@@ -51,9 +51,9 @@ used_SDS = cp.array([0,1,2,3,4,5])
 foldername = "LUT"
 
 
-mua_used = [2205*[air_mua],
-            2205*[PLA_mua],
-            2205*[prism_mua],
+mua_used = [mua_set.shape[0]*[air_mua],
+            mua_set.shape[0]*[PLA_mua],
+            mua_set.shape[0]*[prism_mua],
             list(mua_set[:,0]), # skin mua
             list(mua_set[:,1]), # fat mua
             list(mua_set[:,2]), # musle mua
