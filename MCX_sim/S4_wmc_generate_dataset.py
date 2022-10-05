@@ -215,7 +215,6 @@ if __name__ == "__main__":
         used_mus = np.tile(np.array(used_mus), mua_set.shape[0]).reshape(mua_set.shape[0],5)
         dataset_output = np.empty([mua_set.shape[0],10+len(fiberSet)])
         used_mua = processsor.get_used_mua(mua_set)
-        break
         if datasetpath.find("small_to_large") != -1 or datasetpath.find("large_to_small") != -1:
             output_R = PMC(detOutputPathSet,detectorNum,used_SDS,used_mua)
         else:
