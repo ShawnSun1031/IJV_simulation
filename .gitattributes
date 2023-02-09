@@ -1,3 +1,0 @@
-ANN_forward_model/test_loader.pth filter=lfs diff=lfs merge=lfs -text
-ANN_forward_model/dataset.npy filter=lfs diff=lfs merge=lfs -text
-ANN_forward_model/train_loader.pth filter=lfs diff=lfs merge=lfs -text
